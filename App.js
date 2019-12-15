@@ -45,9 +45,6 @@ export default class App extends Component {
       nutri: [],
       loading: true
     };
-
-
-
     // Url da Api: https://sujeitoprogramador.com/rn-api/?path=posts
     fetch('https://sujeitoprogramador.com/rn-api/?api=posts')
     .then((r) => r.json()) 
@@ -63,32 +60,6 @@ export default class App extends Component {
     await request_storage_runtime_permission()
   }
 
-  downloadImage = (image) => {
-    var date = new Date();
-    var image_URL = {image}; //props
-    var ext = this.getExtention(image_URL);
-    ext = "." + ext[0];
-    const { config, fs } = RNFetchBlob;
-    let PictureDir = fs.dirs.PictureDir
-    let options = {
-      fileCache: true,
-      addAndroidDownloads: {
-        useDownloadManager: true,
-        notification: true,
-        path: PictureDir + "/image_" + Math.floor(date.getTime()
-          + date.getSeconds() / 2) + ext,
-        description: 'Image'
-      }
-    }
-    config(options).fetch('GET', image_URL).then((res) => {
-      Alert.alert("Image Downloaded Successfully.");
-    });
-  };
-
-  getExtention = (filename) => {
-    return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) :
-      undefined;
-  }
   
   render() {
 
@@ -117,6 +88,35 @@ export default class App extends Component {
 
 //Component Nutri
 class Nutri extends Component{
+
+  
+  downloadImage(image) {
+    var date = new Date();
+    var image_URL = image; //props
+    var ext = this.getExtention(image_URL);
+    ext = "." + ext[0];
+    const { config, fs } = RNFetchBlob;
+    let PictureDir = fs.dirs.PictureDir
+    let options = {
+      fileCache: true,
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        notification: true,
+        path: PictureDir + "/image_" + Math.floor(date.getTime()
+          + date.getSeconds() / 2) + ext,
+        description: 'Image'
+      }
+    }
+    config(options).fetch('GET', image_URL).then((res) => {
+      Alert.alert("Image Downloaded Successfully.");
+    });
+  };
+
+  getExtention = (filename) => {
+    return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) :
+      undefined;
+  }
+
   render(){
     return(
       <View>
@@ -128,7 +128,7 @@ class Nutri extends Component{
           <View style={styles.areaCategoria}>
             <Text style={styles.categoriaNome}>{this.props.data.categoria.toUpperCase()}</Text>
             <View style={styles.areaBtn}>
-              <TouchableOpacity style={styles.btnLeia} onPress={this.downloadImage(this.props.data.capa)}>
+              <TouchableOpacity style={styles.btnLeia} onPress={() => this.downloadImage(this.props.data.capa)}>
                 <Text style={styles.btnTexto}>Download Image</Text>
               </TouchableOpacity>
             </View>
