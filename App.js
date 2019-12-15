@@ -6,8 +6,36 @@ import {
   View,
   FlatList,
   Image,
+  PermissionsAndroid,
+  Alert, 
   TouchableOpacity
 } from 'react-native';
+import RNFetchBlob from 'rn-fetch-blob';
+
+export async function request_storage_runtime_permission() {
+ 
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        'title': 'ReactNativeCode Storage Permission',
+        'message': 'ReactNativeCode App needs access to your storage to download Photos.'
+      }
+    )
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+ 
+      Alert.alert("Storage Permission Granted.");
+    }
+    else {
+ 
+      Alert.alert("Storage Permission Not Granted");
+ 
+    }
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
 
 export default class App extends Component {
 
@@ -18,6 +46,8 @@ export default class App extends Component {
       loading: true
     };
 
+
+
     // Url da Api: https://sujeitoprogramador.com/rn-api/?path=posts
     fetch('https://sujeitoprogramador.com/rn-api/?api=posts')
     .then((r) => r.json()) 
@@ -27,11 +57,39 @@ export default class App extends Component {
         state.nutri = json;
         this.setState(state);
     }); 
-
-
-
   }
 
+  async componentDidMount() {
+    await request_storage_runtime_permission()
+  }
+
+  downloadImage = (image) => {
+    var date = new Date();
+    var image_URL = {image}; //props
+    var ext = this.getExtention(image_URL);
+    ext = "." + ext[0];
+    const { config, fs } = RNFetchBlob;
+    let PictureDir = fs.dirs.PictureDir
+    let options = {
+      fileCache: true,
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        notification: true,
+        path: PictureDir + "/image_" + Math.floor(date.getTime()
+          + date.getSeconds() / 2) + ext,
+        description: 'Image'
+      }
+    }
+    config(options).fetch('GET', image_URL).then((res) => {
+      Alert.alert("Image Downloaded Successfully.");
+    });
+  };
+
+  getExtention = (filename) => {
+    return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) :
+      undefined;
+  }
+  
   render() {
 
     if(this.state.loading){
@@ -53,6 +111,10 @@ export default class App extends Component {
   }
 }
 
+
+
+
+
 //Component Nutri
 class Nutri extends Component{
   render(){
@@ -66,8 +128,8 @@ class Nutri extends Component{
           <View style={styles.areaCategoria}>
             <Text style={styles.categoriaNome}>{this.props.data.categoria.toUpperCase()}</Text>
             <View style={styles.areaBtn}>
-              <TouchableOpacity style={styles.btnLeia}>
-                <Text style={styles.btnTexto}>LEIA MAIS</Text>
+              <TouchableOpacity style={styles.btnLeia} onPress={this.downloadImage(this.props.data.capa)}>
+                <Text style={styles.btnTexto}>Download Image</Text>
               </TouchableOpacity>
             </View>
           </View>
