@@ -11,7 +11,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
-
+import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 export async function request_storage_runtime_permission() {
  
   try {
@@ -42,35 +42,25 @@ export default class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      nutri: [],
-      loading: true
+      nutri: []
     };
     // Url da Api: https://sujeitoprogramador.com/rn-api/?path=posts
     fetch('https://sujeitoprogramador.com/rn-api/?api=posts')
     .then((r) => r.json()) 
     .then((json) => {
         let state = this.state;
-        state.loading = false;
         state.nutri = json;
         this.setState(state);
     }); 
   }
 
-  async componentDidMount() {
-    await request_storage_runtime_permission()
+   async componentDidMount() {
+     await request_storage_runtime_permission()
   }
 
   
   render() {
-
-    if(this.state.loading){
-      return(
-        <View style={{flex:1, alignItems:'center', justifyContent: 'center'}}>
-          <Text style={{fontSize:18}}>Carregando...</Text>
-        </View>
-      );
-    }else{
-      return (
+    return (
         <View style={styles.container}>
             <FlatList data={this.state.nutri}
                       keyExtractor={item => item.id.toString()}
@@ -78,7 +68,6 @@ export default class App extends Component {
             />
         </View>
       )
-    }
   }
 }
 
@@ -88,8 +77,16 @@ export default class App extends Component {
 
 //Component Nutri
 class Nutri extends Component{
-
+  constructor(props){
+    super(props);
+    this.state = {
+      visible: false
+    };
+  }
   
+  componentDidMount() {
+    setTimeout(() => this.setState({visible: !this.state.visible}), 3000);
+  }
   downloadImage(image) {
     var date = new Date();
     var image_URL = image; //props
@@ -120,23 +117,47 @@ class Nutri extends Component{
   render(){
     return(
       <View>
-        <View style={styles.card}>
-          <Image resizeMode="cover" source={{uri: this.props.data.capa}} style={styles.capa}/>
-          <Text style={[styles.titulo, styles.espaco]}>{this.props.data.titulo}</Text>
-          <Text style={[styles.subtitulo, styles.espaco]}>{this.props.data.subtitulo}</Text>
-          <Text style={[styles.categoria, styles.espaco]}>Categoria:</Text>
-          <View style={styles.areaCategoria}>
-            <Text style={styles.categoriaNome}>{this.props.data.categoria.toUpperCase()}</Text>
-            <View style={styles.areaBtn}>
-              <TouchableOpacity style={styles.btnLeia} onPress={() => this.downloadImage(this.props.data.capa)}>
-                <Text style={styles.btnTexto}>Download Image</Text>
-              </TouchableOpacity>
+        
+          <View style={styles.card}>
+              <ShimmerPlaceholder
+              style={{height: 300, width: '95%', margin: 10, borderRadius: 10}}
+              autoRun={true}
+              visible={this.state.visible}  
+            >
+              <Image resizeMode="cover" source={{uri: this.props.data.capa}} style={styles.capa}/>
+            </ShimmerPlaceholder>
+            <ShimmerPlaceholder
+               style={{height: 35, margin: 10, borderRadius: 10, textAlign: 'center', alignItems: 'center',
+               justifyContent: 'center'}}
+               autoRun={true}
+               visible={this.state.visible}  
+            >
+              <Text style={[styles.titulo, styles.espaco]}>{this.props.data.titulo}</Text>
+            </ShimmerPlaceholder>
+            <ShimmerPlaceholder
+                style={{height: 35, margin: 10, borderRadius: 10}}
+                autoRun={true}
+                visible={this.state.visible}  
+            >
+                <Text style={[styles.subtitulo, styles.espaco]}>{this.props.data.subtitulo}</Text>
+            </ShimmerPlaceholder>
+            <Text style={[styles.categoria, styles.espaco]}>Categoria:</Text>
+            <View style={styles.areaCategoria}>
+              <ShimmerPlaceholder
+                 style={{height: 35, borderRadius: 10}}
+                 autoRun={true}
+                 visible={this.state.visible}  
+              >
+                <Text style={styles.categoriaNome}>{this.props.data.categoria.toUpperCase()}</Text>
+              </ShimmerPlaceholder> 
+                <View style={styles.areaBtn}>
+                  <TouchableOpacity style={styles.btnLeia} onPress={() => this.downloadImage(this.props.data.capa)}>
+                    <Text style={styles.btnTexto}>Download Image</Text>
+                  </TouchableOpacity>
+                </View>
+
             </View>
           </View>
-
-
-        </View>
-
 
 
       </View>
